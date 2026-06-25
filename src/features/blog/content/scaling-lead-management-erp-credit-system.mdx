@@ -1,0 +1,224 @@
+---
+title: Designing a Credit-Based Lead Marketplace ERP for Real Estate Brokers
+description: How I architected a subscription-based lead management ERP with a credit system, Prisma ORM, MySQL, and automated push notifications — serving real estate brokers across India.
+image: /images/blogs/erp.png
+createdAt: 2026-04-15
+updatedAt: 2026-06-25
+---
+
+Real estate brokerage in India runs on leads. A broker's income depends entirely on their ability to acquire, evaluate, and close property leads before competitors do. I was brought on to build a **subscription-based lead marketplace ERP** — something akin to NoBroker or MagicBricks, but specifically for brokers rather than buyers.
+
+<FramedImage
+  src="/images/blogs/erp.png"
+  alt="Lead Management ERP Dashboard"
+/>
+
+## The Business Model
+
+The platform works on a **credit system**:
+
+1. Brokers register and create a profile
+2. They purchase credit packages via a payment gateway
+3. Each lead is listed with partial info (location, property type, budget range)
+4. To unlock full contact details, a broker spends credits
+5. Admin uploads leads in bulk; the system handles distribution and notifications
+
+This model aligns incentives well — brokers only pay for leads they're genuinely interested in.
+
+## Technical Architecture
+
+The stack was chosen for robustness and developer velocity:
+
+- **Next.js** — Admin portal and broker-facing dashboard
+- **Express.js** — REST API powering the mobile app
+- **Prisma ORM** — Type-safe database access
+- **MySQL** — Relational data model for leads, transactions, credits
+- **Flutter API** — Mobile app for brokers on the go
+- **FCM (Firebase Cloud Messaging)** — Push notifications
+
+### Database Schema Design
+
+The credit system required careful schema design to prevent race conditions on concurrent credit deductions:
+
+```prisma
+model Broker {
+  id           Int           @id @default(autoincrement())
+  name         String
+  email        String        @unique
+  phone        String
+  creditBalance Int          @default(0)
+  city         String
+  state        String
+  status       BrokerStatus  @default(PENDING)
+  subscriptions Subscription[]
+  transactions  Transaction[]
+  unlockedLeads UnlockedLead[]
+  createdAt    DateTime      @default(now())
+}
+
+model Lead {
+  id           Int          @id @default(autoincrement())
+  propertyType String
+  location     String
+  budgetMin    Int
+  budgetMax    Int
+  contactName  String       // Hidden until unlocked
+  contactPhone String       // Hidden until unlocked
+  creditCost   Int          @default(5)
+  city         String
+  state        String
+  createdAt    DateTime     @default(now())
+  unlockedBy   UnlockedLead[]
+}
+
+model UnlockedLead {
+  id        Int      @id @default(autoincrement())
+  broker    Broker   @relation(fields: [brokerId], references: [id])
+  brokerId  Int
+  lead      Lead     @relation(fields: [leadId], references: [id])
+  leadId    Int
+  unlockedAt DateTime @default(now())
+
+  @@unique([brokerId, leadId]) // Prevent double-unlocking
+}
+```
+
+### Atomic Credit Deduction
+
+To avoid race conditions where a broker could unlock the same lead twice and lose credits, I used **Prisma transactions**:
+
+```typescript
+async function unlockLead(brokerId: number, leadId: number) {
+  return await prisma.$transaction(async (tx) => {
+    const broker = await tx.broker.findUnique({
+      where: { id: brokerId },
+      select: { creditBalance: true },
+    });
+
+    const lead = await tx.lead.findUnique({
+      where: { id: leadId },
+      select: { creditCost: true },
+    });
+
+    if (!broker || broker.creditBalance < lead!.creditCost) {
+      throw new Error("Insufficient credits");
+    }
+
+    // Check if already unlocked
+    const existing = await tx.unlockedLead.findUnique({
+      where: { brokerId_leadId: { brokerId, leadId } },
+    });
+    if (existing) throw new Error("Lead already unlocked");
+
+    // Deduct credits and create unlock record atomically
+    await tx.broker.update({
+      where: { id: brokerId },
+      data: { creditBalance: { decrement: lead!.creditCost } },
+    });
+
+    return tx.unlockedLead.create({
+      data: { brokerId, leadId },
+    });
+  });
+}
+```
+
+## Bulk Lead Import
+
+The admin uploads leads from Excel sheets or Google Sheets exports. I built an import pipeline using **ExcelJS**:
+
+```typescript
+import ExcelJS from "exceljs";
+
+async function importLeadsFromExcel(filePath: string) {
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.readFile(filePath);
+  const sheet = workbook.getWorksheet(1)!;
+
+  const leads: Omit<Lead, "id">[] = [];
+
+  sheet.eachRow((row, index) => {
+    if (index === 1) return; // Skip header
+    leads.push({
+      propertyType: row.getCell(1).text,
+      location: row.getCell(2).text,
+      budgetMin: parseInt(row.getCell(3).text),
+      budgetMax: parseInt(row.getCell(4).text),
+      contactName: row.getCell(5).text,
+      contactPhone: row.getCell(6).text,
+      city: row.getCell(7).text,
+      state: row.getCell(8).text,
+      creditCost: 5,
+    });
+  });
+
+  // Batch insert for performance
+  await prisma.lead.createMany({ data: leads });
+
+  // Trigger notifications for new leads
+  await notifyBrokersForNewLeads(leads);
+}
+```
+
+## Push Notifications — Targeted by City and State
+
+When new leads are uploaded, brokers in the matching city/state get notified via **FCM**:
+
+```typescript
+async function notifyBrokersForNewLeads(leads: Lead[]) {
+  // Get unique city/state combinations from new leads
+  const locations = [...new Set(leads.map(l => `${l.city}:${l.state}`))];
+
+  for (const loc of locations) {
+    const [city, state] = loc.split(":");
+
+    // Find brokers matching this location who have FCM tokens
+    const brokers = await prisma.broker.findMany({
+      where: {
+        city,
+        state,
+        status: "ACTIVE",
+        fcmToken: { not: null },
+      },
+      select: { fcmToken: true },
+    });
+
+    if (brokers.length === 0) continue;
+
+    await fcm.sendMulticast({
+      tokens: brokers.map(b => b.fcmToken!),
+      notification: {
+        title: `New leads available in ${city}`,
+        body: `${leads.filter(l => l.city === city).length} new property leads just added.`,
+      },
+      data: { city, state, action: "VIEW_LEADS" },
+    });
+  }
+}
+```
+
+## Flutter API Design
+
+The broker mobile app (built in Flutter by a partner developer) consumed my REST API. I designed it with mobile-first concerns:
+
+- **Pagination** on all listing endpoints (cursor-based, not offset)
+- **Partial lead data** in list responses (no contact info until credits spent)
+- **JWT refresh tokens** with sliding expiry
+- **Idempotency keys** on payment and credit endpoints
+
+## Reporting Dashboard
+
+The admin panel (built in Next.js) includes:
+
+- Revenue charts (subscriptions sold, credits purchased)
+- Lead conversion rates (viewed vs. unlocked)
+- Broker activity logs (logins, searches, unlocks)
+- Bulk notification sender with city/state/status filters
+
+## Key Takeaways
+
+**Prisma transactions are essential** for any system involving balance deductions or marketplace actions. Without them, concurrent requests can create inconsistencies that are nearly impossible to debug in production.
+
+**FCM topic messaging** would have been cleaner than multicast for city-based targeting — something I'd change in v2. Topics allow brokers to self-subscribe/unsubscribe without backend coordination.
+
+**Bulk imports need validation pipelines** — raw Excel data is messy. Adding a validation step that returns a preview with error rows before actually committing to the DB would have saved us several support tickets.

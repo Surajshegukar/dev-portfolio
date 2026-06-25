@@ -1,0 +1,166 @@
+---
+title: Building an AI-Powered Job Tracker with a Chrome Extension and BullMQ
+description: A technical deep-dive into JobX — a privacy-first job tracking platform with an offline-first Manifest V3 Chrome Extension, IndexedDB storage, BullMQ background workers, and Gemini AI for resume tailoring.
+image: /images/blogs/jobx.png
+createdAt: 2026-05-20
+updatedAt: 2026-06-25
+---
+
+Job hunting is broken. You apply to dozens of roles across LinkedIn, Naukri, Indeed, and Wellfound — and immediately lose track of everything. No centralized history, no resume matching, no spend tracking on AI tools.
+
+I built **Job Intelligence Collector (JobX)** to fix this — a full-stack, privacy-first platform managed in a **Turborepo monorepo** that connects a Chrome Extension, a Next.js dashboard, and an AI orchestration backend.
+
+<FramedImage
+  src="/images/blogs/jobx.png"
+  alt="JobX — AI-Powered Job Tracking Platform"
+/>
+
+## System Architecture
+
+The platform lives in a Turborepo monorepo with three packages:
+
+```
+apps/
+  extension/     # Chrome Extension (Manifest V3)
+  web/           # Next.js dashboard
+  api/           # Express + BullMQ backend
+packages/
+  shared/        # Shared types and schemas
+  ui/            # Shared React components
+```
+
+This structure lets the Extension and Web app share TypeScript types with zero duplication and keeps deployment targets independent.
+
+## The Chrome Extension — Offline-First, Manifest V3
+
+### Domain-Specific Scrapers
+
+The extension uses a **content script** architecture with domain-specific scrapers:
+
+```typescript
+// LinkedIn scraper
+const scraper = new LinkedInJobScraper();
+const jobData = await scraper.extract(document);
+```
+
+I built scrapers for:
+- **LinkedIn** — job details, company info, easy apply detection
+- **Indeed** — salary range parsing, remote/hybrid flags
+- **Naukri** — skills, experience range, location parsing
+- **Wellfound** — startup stage, equity range, team size
+
+For sites without a dedicated scraper, a **generic schema parser** uses structured data (`application/ld+json`) and Open Graph meta tags to extract what it can.
+
+### Real-Time Popup with MutationObserver
+
+The biggest UX challenge with Manifest V3 is keeping the popup in sync with the active tab without persistent background scripts. I solved this using `MutationObserver` in the content script:
+
+```typescript
+// Content script watches for SPA navigation changes
+const observer = new MutationObserver(debounce(async () => {
+  const newJobData = await scraper.extract(document);
+  chrome.runtime.sendMessage({ type: "JOB_UPDATED", data: newJobData });
+}, 300));
+
+observer.observe(document.body, { childList: true, subtree: true });
+```
+
+The popup re-renders automatically when the user navigates between job listings on a SPA — no page reload needed.
+
+### IndexedDB with Dexie.js
+
+All job data is stored **locally first** using IndexedDB via [Dexie.js](https://dexie.org/):
+
+```typescript
+class JobDatabase extends Dexie {
+  jobs!: Table<Job>;
+  applications!: Table<Application>;
+
+  constructor() {
+    super("JobXDB");
+    this.version(1).stores({
+      jobs: "++id, jobId, platform, status, savedAt",
+      applications: "++id, jobId, appliedAt, resumeVersion",
+    });
+  }
+}
+```
+
+This means the extension works completely offline. Data syncs to the cloud dashboard only when the user is online.
+
+## Resume Intelligence — Parsing + AI Tailoring
+
+### Parsing PDFs and DOCX Files
+
+The web dashboard accepts resume uploads in PDF and DOCX format:
+
+```typescript
+import pdfParse from "pdf-parse";
+import mammoth from "mammoth";
+
+async function parseResume(file: File): Promise<string> {
+  if (file.type === "application/pdf") {
+    const buffer = await file.arrayBuffer();
+    const result = await pdfParse(Buffer.from(buffer));
+    return result.text;
+  }
+  if (file.type.includes("word")) {
+    const buffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ buffer: Buffer.from(buffer) });
+    return result.value;
+  }
+  throw new Error("Unsupported file type");
+}
+```
+
+### AI Resume Tailoring via BullMQ
+
+LLM calls (Gemini/OpenAI) are expensive and slow. I never make them synchronously — instead, every AI task goes through a **Redis-backed BullMQ queue**:
+
+```typescript
+// Enqueue the tailoring job
+const tailorQueue = new Queue("resume-tailor", { connection: redis });
+
+await tailorQueue.add("tailor", {
+  resumeText,
+  jobDescription,
+  userId,
+});
+```
+
+A worker processes the queue and streams results back to the client via **Server-Sent Events (SSE)**:
+
+```typescript
+// Worker
+const worker = new Worker("resume-tailor", async (job) => {
+  const stream = await gemini.generateContentStream(prompt);
+  // Stream tokens back via SSE...
+}, { connection: redis });
+```
+
+This architecture means the UI stays responsive, jobs don't time out, and failed AI calls retry automatically with exponential backoff.
+
+## Telemetry Dashboard
+
+Every AI call is tracked: model, token count, latency, and cost estimate. The dashboard gives a real-time view of your AI spend so you never get surprised by a bill.
+
+```typescript
+interface AITelemetry {
+  model: string;
+  promptTokens: number;
+  completionTokens: number;
+  latencyMs: number;
+  estimatedCostUsd: number;
+  timestamp: Date;
+}
+```
+
+## What I Learned
+
+**Manifest V3 is genuinely restrictive** — no persistent background pages means you have to get creative with `chrome.alarms`, service workers, and message passing to replicate what was trivial in V2.
+
+**BullMQ is excellent for AI workloads** — the retry logic, prioritization, and rate-limiting built into BullMQ removed a whole class of problems I'd have to solve manually.
+
+**Dexie.js makes IndexedDB actually enjoyable** — the reactive queries and TypeScript support make it feel like using a proper ORM in the browser.
+
+The project is open-source at [github.com/Surajshegukar/jobx](https://github.com/Surajshegukar/jobx).

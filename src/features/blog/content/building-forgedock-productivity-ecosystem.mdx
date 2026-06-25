@@ -1,0 +1,128 @@
+---
+title: Building ForgeDock — A Unified Productivity Platform with 100+ Tools
+description: How I designed and shipped ForgeDock, a modern Next.js 15 web app unifying PDF, image, developer, and AI utilities into one SEO-optimized ecosystem.
+image: /images/blogs/forgedock.png
+pinned: true
+createdAt: 2026-06-01
+updatedAt: 2026-06-25
+---
+
+ForgeDock started as a personal frustration. I found myself bouncing between dozens of browser tabs for simple tasks — converting a PDF, compressing an image, formatting JSON, decoding a JWT. So I built one place for all of it.
+
+<FramedImage
+  src="/images/blogs/forgedock.png"
+  alt="ForgeDock Productivity Platform Dashboard"
+/>
+
+## The Problem
+
+Modern developers and content creators rely on a fragmented set of online tools:
+
+- ilovepdf.com for PDFs
+- squoosh.app for image compression
+- jwt.io for token decoding
+- Various random sites for calculators, base64, regex tools...
+
+Each of these has their own UX quirks, ads, and data concerns. I wanted a **unified, privacy-aware, fast platform** where everything just works.
+
+## The Architecture
+
+### Next.js 15 App Router + React 19
+
+ForgeDock is built entirely on the **Next.js 15 App Router** with **React 19 Server Components**. This combination gives us:
+
+- Zero-JS pages for pure SEO landing pages
+- Streaming and Suspense for tool UIs that load progressively
+- Server Actions for secure file-processing endpoints (no client-side token exposure)
+
+```tsx
+// Example: Server Action for PDF compression
+"use server";
+
+export async function compressPdf(formData: FormData) {
+  const file = formData.get("file") as File;
+  const buffer = Buffer.from(await file.arrayBuffer());
+  // process with pdf-lib on the server...
+  return compressed;
+}
+```
+
+### Specialized Tool Suites
+
+I organized the 100+ tools into focused modules:
+
+| Suite | Tools |
+|-------|-------|
+| **PDFForge** | Merge, split, compress, convert |
+| **ImageForge** | Upscale, background remove, convert, compress |
+| **DevForge** | JSON formatter, JWT decoder, Base64, Regex tester |
+| **AIForge** | Text summarizer, code explainer, prompt helpers |
+| **CalcForge** | EMI, GST, age, unit conversion calculators |
+
+### Authentication — Clerk + Multi-Tenancy
+
+I chose **Clerk** for authentication because of its built-in multi-tenancy (organizations) support. Users get personal workspaces; teams can share saved tool outputs.
+
+```typescript
+// Protecting a tool route
+import { auth } from "@clerk/nextjs/server";
+
+export async function GET() {
+  const { userId } = await auth();
+  if (!userId) return new Response("Unauthorized", { status: 401 });
+  // ...
+}
+```
+
+### Serverless Storage — Cloudflare R2 + Supabase
+
+For file-processing tools (PDF/image uploads), I needed fast, cheap object storage:
+
+- **Cloudflare R2** — zero egress fees, used for temporary file uploads
+- **Supabase (PostgreSQL)** — transactional data: user settings, saved outputs, usage logs
+- **AWS S3** — fallback and archive storage for processed files
+
+Signed upload URLs are generated server-side so API keys never touch the browser.
+
+### SEO Architecture
+
+Every tool page is statically generated with a proper `<head>`, structured data (JSON-LD), sitemap, and `robots.txt`. Google crawlability was a first-class concern from day one.
+
+```typescript
+// Generating metadata for each tool
+export function generateMetadata({ params }): Metadata {
+  const tool = getToolBySlug(params.slug);
+  return {
+    title: `${tool.name} — Free Online ${tool.category} Tool | ForgeDock`,
+    description: tool.description,
+    openGraph: { ... },
+  };
+}
+```
+
+## Key Technical Challenges
+
+### 1. File Processing in Serverless Environments
+
+Vercel Functions have a 50MB payload limit and short execution windows. For large PDF operations, I route to **Cloudflare Workers** which support larger payloads and longer timeouts.
+
+### 2. Framer Motion + React 19
+
+React 19's concurrent rendering had some early compatibility issues with Framer Motion animations. I wrapped animated components in `<Suspense>` boundaries and deferred their rendering to avoid hydration mismatches.
+
+### 3. Keeping 100+ Tool Pages Fast
+
+Each tool is its own route segment. I used Next.js **Partial Prerendering (PPR)** in Next.js 15 to statically shell each page and stream only the interactive tool component.
+
+## Results
+
+- **100+ tools** across 5 product suites, live at [forgedock.com](https://forgedock.com)
+- **SEO-optimized** — targeting long-tail keywords per tool category
+- **Multi-tenant** auth with Clerk supporting individual and team workspaces
+- **Sub-1s load times** for static tool pages via Vercel Edge Network
+
+## What's Next
+
+- Tool usage analytics dashboard for registered users
+- Collaboration features — share processed files with team
+- API access — programmatic tool usage via REST for power users
