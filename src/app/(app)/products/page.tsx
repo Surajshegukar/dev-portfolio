@@ -17,7 +17,7 @@ const products = [
     name: "ForgeDock",
     description:
       "A modern, SEO-optimized web productivity platform that unifies 100+ online utilities (PDF, images, dev tools, calculators, AI, and business helpers) into a single ecosystem.",
-    href: "https://forgedock.com",
+    href: "https://forgedock-plum.vercel.app",
     status: "Live",
     tech: ["Next.js 15", "React 19", "TypeScript", "Tailwind CSS", "Shadcn UI", "PostgreSQL", "Supabase", "Clerk"],
     image: "/images/blogs/forgedock.png",

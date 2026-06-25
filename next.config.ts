@@ -1,13 +1,9 @@
 import type { NextConfig } from "next";
-import path from "path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: ["next-mdx-remote"],
   allowedDevOrigins: ["surajshegukar-macbook.local"],
-  turbopack: {
-    root: path.join(__dirname, "."),
-  },
   devIndicators: false,
   images: {
     remotePatterns: [
