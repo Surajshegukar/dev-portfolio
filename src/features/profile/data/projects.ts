@@ -47,7 +47,7 @@ export const PERSONAL_PROJECTS: Project[] = [
     id: "forgedock",
     title: "ForgeDock — Productivity Tools Ecosystem",
     period: { start: "2025" },
-    link: "https://forgedock.com",
+    link: "https://forgedock-plum.vercel.app",
     skills: ["Next.js 15", "React 19", "TypeScript", "Tailwind CSS", "Shadcn UI", "PostgreSQL", "Supabase", "Clerk", "Framer Motion", "Cloudflare R2"],
     isExpanded: true,
     description: `A modern, SEO-optimized web productivity platform that unifies 100+ online utilities (PDF, images, dev tools, calculators, AI, and business helpers) into a single ecosystem.
