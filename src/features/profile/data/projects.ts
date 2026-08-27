@@ -44,6 +44,19 @@ export const PERSONAL_PROJECTS: Project[] = [
     logo: "https://api.dicebear.com/7.x/shapes/svg?seed=ForgeDock",
   },
   {
+    id: "vinu-invoicing",
+    title: "Vinu Invoicing — Financial Operations Platform",
+    period: { start: "2026" },
+    link: "https://github.com/Surajshegukar/vinu-invoicing",
+    skills: ["Next.js", "React 19", "TypeScript", "MongoDB", "Mongoose", "Tailwind CSS", "React Query", "jsPDF", "Zod", "RBAC"],
+    isExpanded: true,
+    description: `A multi-tenant role-based access control (RBAC) invoicing and inventory management platform built with Next.js and MongoDB.
+- **Granular RBAC & Session Security**: Features a custom authorization table, secure JWT-based sessions, and client/server-side middleware to restrict user actions by role.
+- **Dynamic Invoices & UPI Payments**: Auto-calculates multi-currency totals, taxes, and discounts, converting totals to words and embedding dynamic UPI payment QR codes.
+- **PDF Generation & Excel Sync**: Seamlessly exports invoices as styled PDFs (via jsPDF) and imports/exports client or product inventories via xlsx spreadsheets.`,
+    logo: "https://api.dicebear.com/7.x/shapes/svg?seed=VinuInvoicing",
+  },
+  {
     id: "job-intelligence-collector",
     title: "IntelJet - job inteligence collector",
     period: { start: "2026" },
