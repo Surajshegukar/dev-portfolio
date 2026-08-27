@@ -1,0 +1,109 @@
+---
+title: "YTRAG: Building a Private, Local RAG Search Engine with FastAPI, FAISS, and Gemini"
+description: How I built a high-performance local Retrieval-Augmented Generation (RAG) platform with FastAPI, sentence-transformers, FAISS vector search, and Google Gemini for source-cited knowledge synthesis.
+image: /images/blogs/ytrag.jpg
+createdAt: 2026-08-22
+updatedAt: 2026-08-26
+---
+
+With data privacy concerns growing around cloud-based AI tools, companies and researchers need a way to chat with their documents locally. You shouldn't have to upload proprietary PDFs, spreadsheets, or database backups to third-party APIs just to summarize them.
+
+To solve this, I built **YTRAG** (Your local Retrieval-Augmented Generation) — a lightweight, production-grade knowledge synthesis platform. It connects a **FastAPI** backend with a local **FAISS** vector store, **sentence-transformers** for encoding, and **Google Gemini** for cited document synthesis, all accessible through a custom Single-Page Application (SPA) dashboard.
+
+<FramedImage
+  src="/images/blogs/ytrag.jpg"
+  alt="YTRAG Local RAG Dashboard Interface"
+/>
+
+---
+
+## Technical Architecture
+
+YTRAG runs entirely on a lightweight Python framework, utilizing local embeddings and FAISS index computation to perform ultra-fast similarity searches before delegating final generation to Google Gemini:
+
+```
+┌────────────────────────────────────────────────────────┐
+│                        FastAPI                         │
+│  ┌────────────────────┐        ┌────────────────────┐  │
+│  │   Document Loader  │        │   Search & RAG     │  │
+│  └─────────┬──────────┘        └─────────▲──────────┘  │
+└────────────┼─────────────────────────────┼─────────────┘
+             │ Ingestion                   │ Retrieval
+             ▼                             │
+┌─────────────────────────┐      ┌─────────┴──────────┐
+│  sentence-transformers  │      │    FAISS Index     │
+│   (all-MiniLM-L6-v2)    │      │    (faiss-cpu)     │
+└────────────┬────────────┘      └─────────▲──────────┘
+             │ Embeddings                  │ Storage
+             └─────────────────────────────┘
+```
+
+### Key System Components:
+1. **Multi-Format Ingestion Engine**: A custom loading library built using `PyPDF`/`PyMuPDF`, `docx2txt`, and `UnstructuredExcel` to parse PDF, Word, Excel, CSV, JSON, and plain text.
+2. **Text Chunking Pipeline**: Built using `langchain-text-splitters` with a default setting of 1000 characters per chunk and a 200-character overlap.
+3. **Local Embedding and Vector Storage**: Encodes textual chunks using the `all-MiniLM-L6-v2` Sentence-Transformer model and stores L2 normalized distance metrics in a local **FAISS** CPU index.
+4. **FastAPI Web App & SPA UI**: Houses the REST API backend and serves a clean, modern drag-and-drop file upload and workspace web dashboard.
+
+---
+
+## Implementation Details
+
+### 1. The Document Ingestion Pipeline
+To prepare documents for vector storage, we parse file content, sanitize whitespace, and break text into overlapping chunks. This overlap ensures that semantic concepts spanning boundary limits are not cut in half:
+
+```python
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+def chunk_document(text: str, chunk_size: int = 1000, overlap: int = 200):
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=overlap,
+        length_function=len,
+        separators=["\n\n", "\n", " ", ""]
+    )
+    return splitter.split_text(text)
+```
+
+### 2. Local Similarity Search with FAISS
+We compute embeddings using `sentence-transformers` locally, avoiding network latency during the encoding step. These vectors are indexed into FAISS:
+
+```python
+import faiss
+import numpy as np
+from sentence_transformers import SentenceTransformer
+
+class VectorStore:
+    def __init__(self, dimension: int = 384):
+        self.model = SentenceTransformer("all-MiniLM-L6-v2")
+        self.index = faiss.IndexFlatL2(dimension)
+        self.metadata = []
+
+    def add_texts(self, texts: list):
+        embeddings = self.model.encode(texts)
+        self.index.add(np.array(embeddings).astype("float32"))
+        self.metadata.extend(texts)
+```
+
+### 3. Contextual Synthesis with Citations
+Once relevant chunks are retrieved, they are structured into a prompt template alongside the user's question. We instruct Gemini to synthesize an answer and explicitly cite the document index numbers corresponding to the source chunks:
+
+```python
+from langchain_core.prompts import PromptTemplate
+
+rag_prompt = PromptTemplate.from_template(
+    "You are a helpful knowledge assistant. Synthesize a concise answer to the question "
+    "using ONLY the retrieved contexts below. For every claim, append the source "
+    "index number in brackets (e.g., [1], [2]).\n\n"
+    "Contexts:\n{contexts}\n\n"
+    "Question: {question}\n\n"
+    "Answer:"
+)
+```
+
+---
+
+## The SPA Frontend Interface
+The web UI is served as a Single-Page Application using HTML, vanilla JS, and CSS:
+- **Drag-and-Drop Uploader**: Instantly sends multi-format documents to the FastAPI `/upload` endpoint.
+- **Index Progress Indicator**: Displays real-time state synchronization using server-sent messages.
+- **Source Citation Visualizer**: Clicking on citation badges highlight the exact source paragraphs, showing page numbers and percentage relevance matches.

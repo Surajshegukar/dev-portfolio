@@ -5,7 +5,7 @@ export const WORK_PROJECTS: Project[] = [
     id: "chat-platform",
     title: "University Internal Chat Platform",
     period: { start: "2024" },
-    link: "https://github.com/surajshegukar",
+    link: "#",
     skills: ["Next.js", "Firebase", "WebSockets", "Tailwind CSS", "Real-Time Sync"],
     isExpanded: true,
     description: `A WhatsApp-style internal communication application for a university client, supporting 5,000+ active users with real-time messaging, media sharing, and core chat features.
@@ -18,7 +18,7 @@ export const WORK_PROJECTS: Project[] = [
     id: "easywork-erp",
     title: "Lead Management ERP",
     period: { start: "2024" },
-    link: "https://github.com/surajshegukar",
+    link: "#",
     skills: ["Next.js", "Express.js", "Prisma ORM", "MySQL", "Flutter API", "Push Notifications"],
     isExpanded: true,
     description: `A subscription-based lead marketplace ERP for real estate brokers (similar to NoBroker/MagicBricks for brokers), including broker registration, profiles, and lead discovery.
@@ -31,23 +31,10 @@ export const WORK_PROJECTS: Project[] = [
 
 export const PERSONAL_PROJECTS: Project[] = [
   {
-    id: "job-intelligence-collector",
-    title: "Job Intelligence Collector",
-    period: { start: "2026" },
-    link: "https://github.com/Surajshegukar/jobx",
-    skills: ["Next.js", "React", "TypeScript", "Node.js", "Express", "MongoDB", "Redis", "BullMQ", "Chrome Extension", "IndexedDB", "Dexie.js", "Gemini AI", "Turborepo"],
-    isExpanded: true,
-    description: `A privacy-first, AI-augmented job tracking and application management platform managed in a unified Turborepo monorepo workspace.
-- **Offline-First Chrome Extension (Manifest V3)**: Features domain-specific scrapers (LinkedIn, Indeed, Naukri, Wellfound) and a generic schema parser, with real-time popup auto-refresh using \`MutationObserver\` and IndexedDB (via Dexie.js) for local storage.
-- **Resume Intelligence & Tailoring**: Extends resume parsing (PDF/DOCX) using \`pdf-parse\` and \`mammoth\`, featuring automated tailoring, comparison diff engine, and outcome tracking.
-- **AI Orchestration & Telemetry**: Offloads heavy LLM queries (Gemini/OpenAI) using Redis-backed BullMQ background workers, complete with a real-time token, spend, and latency tracking dashboard.`,
-    logo: "https://api.dicebear.com/7.x/shapes/svg?seed=JobX",
-  },
-  {
     id: "forgedock",
     title: "ForgeDock — Productivity Tools Ecosystem",
     period: { start: "2025" },
-    link: "https://forgedock-plum.vercel.app",
+    link: "https://forgedocks.vercel.app/",
     skills: ["Next.js 15", "React 19", "TypeScript", "Tailwind CSS", "Shadcn UI", "PostgreSQL", "Supabase", "Clerk", "Framer Motion", "Cloudflare R2"],
     isExpanded: true,
     description: `A modern, SEO-optimized web productivity platform that unifies 100+ online utilities (PDF, images, dev tools, calculators, AI, and business helpers) into a single ecosystem.
@@ -57,14 +44,43 @@ export const PERSONAL_PROJECTS: Project[] = [
     logo: "https://api.dicebear.com/7.x/shapes/svg?seed=ForgeDock",
   },
   {
-    id: "travel-forge",
-    title: "TravelForge — AI Travel Planner",
+    id: "job-intelligence-collector",
+    title: "IntelJet - job inteligence collector",
     period: { start: "2026" },
-    link: "https://github.com/Surajshegukar/travel-forge",
-    skills: ["Next.js", "React.js", "Framer Motion", "Lenis Scroll", "Tailwind CSS", "REST APIs"],
+    link: "https://inteljet.vercel.app/",
+    skills: ["Next.js", "React", "TypeScript", "Node.js", "Express", "MongoDB", "Redis", "BullMQ", "Chrome Extension", "IndexedDB", "Dexie.js", "Gemini AI", "Turborepo"],
     isExpanded: true,
-    description: `An AI-powered travel itinerary planning and destination discovery dashboard with interactive planning features, filterable travel ideas, and smooth scroll animations.`,
-    logo: "https://api.dicebear.com/7.x/shapes/svg?seed=TravelForge",
+    description: `A privacy-first, AI-augmented job tracking and application management platform managed in a unified Turborepo monorepo workspace.
+- **Offline-First Chrome Extension (Manifest V3)**: Features domain-specific scrapers (LinkedIn, Indeed, Naukri, Wellfound) and a generic schema parser, with real-time popup auto-refresh using \`MutationObserver\` and IndexedDB (via Dexie.js) for local storage.
+- **Resume Intelligence & Tailoring**: Extends resume parsing (PDF/DOCX) using \`pdf-parse\` and \`mammoth\`, featuring automated tailoring, comparison diff engine, and outcome tracking.
+- **AI Orchestration & Telemetry**: Offloads heavy LLM queries (Gemini/OpenAI) using Redis-backed BullMQ background workers, complete with a real-time token, spend, and latency tracking dashboard.`,
+    logo: "https://api.dicebear.com/7.x/shapes/svg?seed=JobX",
+  },
+  {
+    id: "research-agent",
+    title: "Autonomous Research Agent Pipeline",
+    period: { start: "2026" },
+    link: "https://github.com/Surajshegukar/research-agent",
+    skills: ["LangChain", "Google Gemini", "Tavily Search API", "BeautifulSoup", "Python", "uv"],
+    isExpanded: true,
+    description: `An autonomous, sequential multi-agent research pipeline that automates the process of gathering, analyzing, and synthesizing information.
+- **Sequential Multi-Agent Architecture**: Built with LangChain and Google Gemini, utilizing specialized agents (Search, Reading, Writer, Critic) for the research lifecycle.
+- **Web Search & Scraping**: Integrates Tavily Search API and BeautifulSoup web scraping to retrieve and extract real-time data from top relevant articles.
+- **Quality Control**: Includes a Critic Agent that evaluates the written report for accuracy, clarity, and source quality, scoring it out of 10 with actionable suggestions.`,
+    logo: "https://api.dicebear.com/7.x/shapes/svg?seed=ResearchAgent",
+  },
+  {
+    id: "ytrag-simple-rag-engine",
+    title: "YTRAG — Local RAG Search Engine",
+    period: { start: "2026" },
+    link: "https://github.com/Surajshegukar/ytrag-simple-rag-engine",
+    skills: ["FastAPI", "FAISS", "Google Gemini", "Sentence-Transformers", "LangChain", "Python", "Vanilla JS"],
+    isExpanded: true,
+    description: `A lightweight, local Retrieval-Augmented Generation (RAG) platform featuring a FastAPI backend and a premium Single-Page Application (SPA) web interface.
+- **Multi-Format Ingestion**: Supports parsing and ingestion of PDF, Word, Excel, CSV, JSON, and plain text files with dynamic chunking using LangChain.
+- **Local Embedding & Vector Search**: Generates dense vector representations using Sentence-Transformers and handles fast similarity search utilizing FAISS.
+- **Contextual Synthesis & Premium UI**: Integrates Google Gemini for source-cited summaries of retrieved knowledge, complete with a drag-and-drop file uploader and interactive workspace layout.`,
+    logo: "https://api.dicebear.com/7.x/shapes/svg?seed=YTRAG",
   },
 
   {
@@ -87,14 +103,6 @@ export const PERSONAL_PROJECTS: Project[] = [
     description: `A compilation of quantitative finance models, backtesting environments, momentum trading, and statistical arbitrage strategies tested in Jupyter Notebooks.`,
     logo: "https://api.dicebear.com/7.x/shapes/svg?seed=AlgoTrade",
   },
-  {
-    id: "mahasafar",
-    title: "MahaSafar Travel Planner",
-    period: { start: "2024" },
-    link: "https://github.com/Surajshegukar/mahasafar",
-    skills: ["JavaScript", "Node.js", "Express.js", "MongoDB", "MERN Stack"],
-    description: `A travel discovery and booking assistance web application designed to plan and customize itineraries for destinations across Maharashtra.`,
-    logo: "https://api.dicebear.com/7.x/shapes/svg?seed=MahaSafar",
-  },
-  
+
+
 ];

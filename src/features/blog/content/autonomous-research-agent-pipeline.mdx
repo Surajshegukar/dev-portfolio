@@ -1,0 +1,115 @@
+---
+title: Building an Autonomous Research Agent Pipeline with LangChain and Gemini
+description: A detailed walkthrough of creating a multi-agent system using LangChain, Tavily API, and Google Gemini to automatically search, scrape, synthesize, and critique structured reports.
+image: /images/blogs/research-agent.jpg
+createdAt: 2026-08-20
+updatedAt: 2026-08-25
+---
+
+Researching complex topics is time-consuming. You search Google, open a dozen tabs, copy-paste snippets, synthesize findings, write the report, and then critique it yourself to find gaps. 
+
+To automate this workflow, I built an **Autonomous Sequential Research Agent Pipeline**. Powered by **LangChain** and **Google Gemini (gemini-3.5-flash)**, it takes a research topic and runs a chain of specialized agents to deliver a verified, structured research paper with citations and self-critiques.
+
+<FramedImage
+  src="/images/blogs/research-agent.jpg"
+  alt="Autonomous Research Agent Pipeline Dashboard UI"
+/>
+
+---
+
+## The Sequential Multi-Agent Architecture
+
+Unlike single-prompt AI chats that struggle with hallucinations and narrow search scopes, this pipeline decouples the tasks into a chain of four specialized agents. Each agent acts as a discrete node in the system, passing structured data to the next stage:
+
+```
+[User Input]
+     │
+     ▼
+┌──────────────┐
+│ Search Agent │ ──► Uses Tavily Search API to fetch top 5 relevant articles
+└──────────────┘
+     │
+     ▼
+┌──────────────┐
+│Reading Agent │ ──► Scrapes article text via requests & BeautifulSoup
+└──────────────┘
+     │
+     ▼
+┌──────────────┐
+│ Writer Agent │ ──► Synthesizes structured markdown research report
+└──────────────┘
+     │
+     ▼
+┌──────────────┐
+│ Critic Agent │ ──► Scores report (1-10) and suggests concrete improvements
+└──────────────┘
+     │
+     ▼
+[Final Output]
+```
+
+### The 4 Specialized Agents
+
+| Agent | Core Responsibility | Tool Stack |
+|---|---|---|
+| **Search Agent** | Formulates optimal queries and discovers the most relevant references | Tavily Search API |
+| **Reading Agent** | Fetches URL text payloads, strips HTML noise, and extracts raw knowledge | Python Requests, BeautifulSoup |
+| **Writer Agent** | Structural composition (Introduction, Key Findings, Conclusion, Cited Sources) | Gemini 3.5 Flash, LangChain PromptTemplates |
+| **Critic Agent** | Quality control, fact-check validation, logic inspection, and scoring | Gemini 3.5 Flash |
+
+---
+
+## Core Technical Deep Dive
+
+### 1. The Search Agent & Query Expansion
+To search effectively, the Search Agent doesn't just search the raw user prompt. It uses LLM-driven query expansion to generate search parameters that yield high-quality educational and technical results:
+
+```python
+from langchain_core.prompts import PromptTemplate
+from langchain_google_gemini import GoogleGemini
+
+query_expansion_prompt = PromptTemplate.from_template(
+    "Given the research topic: '{topic}', generate 3 distinct search queries "
+    "optimized for web search engines to retrieve authoritative sources."
+)
+```
+
+### 2. Scraping and Content Normalization
+Once the URLs are discovered, the Reading Agent executes network requests. To prevent scraper blocks and heavy payload issues, it cleans HTML tags, normalizes headers, and retains only structural text:
+
+```python
+import requests
+from bs4 import BeautifulSoup
+
+def scrape_article(url: str) -> str:
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, "html.parser")
+            # Remove script, style, and navigation noise
+            for element in soup(["script", "style", "nav", "footer", "header"]):
+                element.decompose()
+            return " ".join(soup.get_text().split())
+    except Exception as e:
+        return f"Failed to scrape: {str(e)}"
+```
+
+### 3. Synthesis and Quality Critique
+The output of the Writer Agent is fed directly into the Critic Agent. The Critic acts as an editor-in-chief, evaluating the written report based on clarity, logical consistency, accuracy, and citation authenticity. It returns a structured JSON evaluation containing a numeric score (1-10) and feedback logs. If the score is below `8/10`, the writer agent is triggered again with the critique context.
+
+---
+
+## Packaging with UV
+
+To ensure lightning-fast setup and strict dependency locks, this project is packaged using **Astral's `uv`**.
+With `uv`, installing the python virtualenv and loading the pipeline dependencies takes less than two seconds:
+
+```bash
+# Clean, fast installation
+uv venv
+source .venv/bin/activate
+uv pip install -r pyproject.toml
+```
+
+This pipeline demonstrates how chaining simple, task-focused agents with LangChain can yield significantly higher-quality outputs than prompting a raw base LLM alone.

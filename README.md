@@ -9,7 +9,7 @@ This portfolio is adapted from [abdulrehmanwaseem/My-Portfolio](https://github.c
 ## ✨ Features
 
 - **Dynamic Interactive Sections**: Beautiful, collapsible layout components displaying experiences, awards, certifications, and projects.
-- **Projects Showcase**: Detailed records of work and personal projects (including *Job Intelligence Collector* and the *ForgeDock* ecosystem).
+- **Projects Showcase**: Detailed records of work and personal projects (including *IntelJet - job inteligence collector* and the *ForgeDock* ecosystem).
 - **Embedded Blog**: Optimized markdown/MDX-based blogging system.
 - **LLM-Friendly Feeds**: Built-in endpoints providing clean Markdown representations of the portfolio for consumption by LLMs (AI assistants) at:
   - `/llms.txt`
