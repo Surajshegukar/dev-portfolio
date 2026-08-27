@@ -1,0 +1,126 @@
+---
+title: "Vinu Invoicing: Building a Role-Based Invoicing and Inventory Management Platform"
+description: How I architected Vinu Invoicing using Next.js, MongoDB, Mongoose, and jsPDF to handle multi-tenant client billing, granular role-based access control, dynamic UPI QR payments, and spreadsheet reports.
+image: /images/blogs/vinu-invoicing.jpg
+createdAt: 2026-08-25
+updatedAt: 2026-08-26
+---
+
+Managing finances for modern businesses requires more than just making a PDF. It requires tracking inventory, handling customer details, securing system operations based on staff roles, and integrating seamless, scan-to-pay mobile features. 
+
+To streamline this workflow, I built **Vinu Invoicing** — a modern, multi-tenant Role-Based Access Control (RBAC) invoicing and financial operations dashboard built with **Next.js**, **Mongoose & MongoDB**, and client-side **jsPDF** generation.
+
+<FramedImage
+  src="/images/blogs/vinu-invoicing.jpg"
+  alt="Vinu Invoicing Dashboard UI Preview"
+/>
+
+---
+
+## Key Platform Capabilities
+
+Vinu Invoicing is engineered to support clean, modular bookkeeping workflows through these key systems:
+
+- **Granular RBAC Authorization**: Dynamic permissions configured via a user control panel to control page navigation, API execution, and resource editing.
+- **Client & Inventory Tracking**: Unified database tables to manage products, customers, tax rates, and currencies.
+- **On-the-Fly PDF & UPI QR Codes**: Seamlessly compiles styled invoices client-side using `jsPDF` and embeds a dynamic UPI payment QR code (e.g. Google Pay, PhonePe, Paytm).
+- **Inventory Excel Sync**: Built-in import/export capabilities supporting `.xlsx` spreadsheets to mass upload products and clients.
+
+---
+
+## Under the Hood: Key Technical Components
+
+### 1. Granular Role-Based Access Control
+To enforce security, the platform maps roles (e.g. `Admin`, `Manager`, `Billing`) to fine-grained access rules. These rules are verified on both the client (UI rendering) and server (API requests):
+
+```typescript
+// src/lib/rbac/auth-server.ts
+export type Permission = 'invoice:create' | 'invoice:delete' | 'settings:write' | 'users:manage';
+
+export function hasPermission(role: string, permission: Permission): boolean {
+  const rolePermissions: Record<string, Permission[]> = {
+    Admin: ['invoice:create', 'invoice:delete', 'settings:write', 'users:manage'],
+    Manager: ['invoice:create', 'settings:write'],
+    Billing: ['invoice:create'],
+  };
+  return rolePermissions[role]?.includes(permission) || false;
+}
+```
+
+### 2. Client-Side PDF Generation with jsPDF
+Generating PDFs on the server can incur significant computational cost and memory overhead. Instead, Vinu Invoicing builds styled invoices directly on the client's browser, incorporating table formatting, auto-tallies, and automatic number-to-words currency conversion:
+
+```typescript
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
+
+export function generateInvoicePdf(invoice: any) {
+  const doc = new jsPDF();
+  
+  // Title & Metadata
+  doc.setFontSize(20);
+  doc.text(`INVOICE: ${invoice.invoiceNumber}`, 14, 20);
+  
+  // Billing Table
+  const tableData = invoice.items.map((item: any) => [
+    item.name,
+    item.quantity,
+    `$${item.price}`,
+    `$${item.quantity * item.price}`
+  ]);
+  
+  (doc as any).autoTable({
+    startY: 40,
+    head: [["Item Name", "Qty", "Price", "Total"]],
+    body: tableData,
+  });
+  
+  doc.save(`invoice_${invoice.invoiceNumber}.pdf`);
+}
+```
+
+### 3. Dynamic UPI Payment QR Codes
+To make payment friction-free, we generate a UPI string matching the exact transaction amount and merchant configurations. This string is rendered into a scannable QR code embedded directly into the invoice:
+
+```typescript
+// src/utils/upi.ts
+export function generateUpiString(merchantId: string, merchantName: string, amount: number, txRef: string) {
+  const encodedName = encodeURIComponent(merchantName);
+  return `upi://pay?pa=${merchantId}&pn=${encodedName}&am=${amount}&tr=${txRef}&cu=INR`;
+}
+```
+
+---
+
+## Scalable State Management & DB Queries
+
+The dashboard uses **@tanstack/react-query** to cache, pre-fetch, and invalidate billing/client data in real-time. This eliminates redundant MongoDB requests and provides an instantaneous user experience:
+
+```typescript
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+export function useInvoices() {
+  const queryClient = useQueryClient();
+  
+  const query = useQuery({
+    queryKey: ["invoices"],
+    queryFn: async () => (await fetch("/api/invoices")).json(),
+  });
+  
+  const createMutation = useMutation({
+    mutationFn: async (newInvoice) => {
+      return fetch("/api/invoices", {
+        method: "POST",
+        body: JSON.stringify(newInvoice),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+    },
+  });
+
+  return { ...query, createInvoice: createMutation.mutate };
+}
+```
+
+This stack guarantees that Vinu Invoicing stays fast, secure, and extremely light on server resources while serving complex multi-user commercial business operations.
