@@ -17,7 +17,7 @@ export const USER: User = {
   ],
   address: "Pune, Maharashtra, India",
   phoneNumber: "KzkxOTAyMTQzNDc1MQ==", // +919021434751
-  secondPhoneNumber: "",
+  secondPhoneNumber: "KzkxOTAyMTQzNDc1MQ==",
   email: "c3VyYWpzaGVndWthcjI3MzJAZ21haWwuY29t", // surajshegukar2732@gmail.com
   website: "https://github.com/surajshegukar",
   jobTitle: "Full-Stack Developer",
