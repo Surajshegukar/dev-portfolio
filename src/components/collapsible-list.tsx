@@ -1,4 +1,5 @@
-import { ChevronDownIcon } from "lucide-react";
+import { ArrowRightIcon, ChevronDownIcon } from "lucide-react";
+import Link from "next/link";
 import { Slot as SlotPrimitive } from "radix-ui";
 import React from "react";
 
@@ -14,16 +15,42 @@ const Slot = SlotPrimitive.Slot;
 export function CollapsibleList<T>({
   items,
   max = 3,
-
   keyExtractor,
   renderItem,
+  redirectHref,
+  redirectText = "Show More",
 }: {
   items: T[];
   max?: number;
-
   keyExtractor?: (item: T) => string;
   renderItem: (item: T) => React.ReactNode;
+  redirectHref?: string;
+  redirectText?: string;
 }) {
+  if (redirectHref) {
+    return (
+      <div>
+        {items.slice(0, max).map((award, index) => (
+          <Slot
+            key={typeof keyExtractor === "function" ? keyExtractor(award) : index}
+            className="border-b border-edge"
+          >
+            {renderItem(award)}
+          </Slot>
+        ))}
+
+        <div className="flex h-12 items-center justify-center pb-px">
+          <Button asChild variant="default" className="flex items-center gap-2">
+            <Link href={redirectHref}>
+              <span>{redirectText}</span>
+              <ArrowRightIcon className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Collapsible>
       {items.slice(0, max).map((award, index) => (

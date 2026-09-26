@@ -2,12 +2,60 @@ import type { Project } from "../types/projects";
 
 export const WORK_PROJECTS: Project[] = [
   {
+    id: "infynospark-school-erp",
+    title: "Subscription SaaS School ERP — Infynospark",
+    period: { start: "2025" },
+    link: "https://school.infynospark.cloud/",
+    skills: ["SaaS", "Multi-Tenant", "React.js", "Next.js", "Node.js", "Express.js", "MongoDB", "Tailwind CSS", "RBAC", "REST APIs"],
+    categories: ["erps"],
+    isExpanded: false,
+    showOnHomepage: true,
+    description: `A multi-tenant, subscription-based SaaS School Management ERP application developed for Infynospark client, empowering educational institutions with scalable cloud operations.
+- **Subscription & Multi-Tenancy**: Engineered multi-tenant architecture supporting tiered subscription plans, tenant data isolation, and automated billing management for schools.
+- **Multi-Role Portals**: Designed customized dashboards for School Admins, Teachers, Students, and Parents for daily academic and administrative management.
+- **Core ERP Modules**: Built integrated solutions for student admissions, daily attendance, fee collection & invoicing, timetable scheduling, and report card generation.
+- **Security & Notifications**: Enforced strict Role-Based Access Control (RBAC) and integrated notification alerts for fee dues, announcements, and attendance status.`,
+    logo: "https://api.dicebear.com/7.x/shapes/svg?seed=InfynosparkERP",
+  },
+  {
+    id: "infynospark-website",
+    title: "Infynospark — Business Website",
+    period: { start: "2025" },
+    link: "https://infynospark.cloud/",
+    skills: ["Next.js", "React.js", "TypeScript", "Tailwind CSS", "Framer Motion", "SEO", "Web Design"],
+    categories: ["business", "designs"],
+    isExpanded: false,
+    showOnHomepage: false,
+    description: `Official business platform and corporate website designed and developed for Infynospark IT Services & Consultancy.
+- **Modern UI/UX & Responsive Layout**: Designed clean, high-conversion landing pages featuring custom animations and interactive service showcases.
+- **SEO & Core Web Vitals**: Optimized for search engine visibility, fast page loads, structured meta tags, and smooth mobile experience.
+- **Service Showcase & Lead Capture**: Integrated service offerings, client inquiry forms, portfolio showcases, and direct contact gateways.`,
+    logo: "https://api.dicebear.com/7.x/shapes/svg?seed=InfynosparkWeb",
+  },
+  {
+    id: "nuttyindia-website",
+    title: "Nutty India — E-Commerce & Business Website",
+    period: { start: "2025" },
+    link: "#",
+    skills: ["React.js", "Next.js", "TypeScript", "Tailwind CSS", "E-Commerce", "SEO", "Web Design"],
+    categories: ["business", "designs"],
+    isExpanded: false,
+    showOnHomepage: false,
+    description: `Modern business and e-commerce web application developed for Nutty India, showcasing healthy dry fruits, nuts, and gourmet snack offerings.
+- **E-Commerce & Product Showcase**: Built dynamic product catalog pages with category filtering, search, and responsive product cards.
+- **Brand UI/UX & Responsive Design**: Designed mobile-first, high-conversion interfaces with fast page transitions and clean visual branding.
+- **Performance & SEO Optimization**: Optimized image rendering, Core Web Vitals, metadata, and page load speed for optimal search engine ranking.`,
+    logo: "https://api.dicebear.com/7.x/shapes/svg?seed=NuttyIndia",
+  },
+  {
     id: "chat-platform",
     title: "University Internal Chat Platform",
     period: { start: "2024" },
-    link: "#",
+    link: "",
     skills: ["Next.js", "Firebase", "WebSockets", "Tailwind CSS", "Real-Time Sync"],
-    isExpanded: true,
+    categories: ["erps"],
+    isExpanded: false,
+    showOnHomepage: true,
     description: `A WhatsApp-style internal communication application for a university client, supporting 5,000+ active users with real-time messaging, media sharing, and core chat features.
 - Architected the application using Next.js and Firebase for real-time data sync, focusing on scalability and reliability under concurrent user load.
 - Created an intuitive and optimized chat UI supporting media attachments, message read receipts, and typing indicators.
@@ -20,7 +68,9 @@ export const WORK_PROJECTS: Project[] = [
     period: { start: "2024" },
     link: "#",
     skills: ["Next.js", "Express.js", "Prisma ORM", "MySQL", "Flutter API", "Push Notifications"],
-    isExpanded: true,
+    categories: ["erps"],
+    isExpanded: false,
+    showOnHomepage: true,
     description: `A subscription-based lead marketplace ERP for real estate brokers (similar to NoBroker/MagicBricks for brokers), including broker registration, profiles, and lead discovery.
 - Designed a credit-based subscription and payment system where brokers purchase credits to unlock lead contact details.
 - Built REST APIs powering a companion Flutter mobile app, plus bulk lead import from Excel/Google Sheets and admin reporting dashboards.
@@ -36,7 +86,9 @@ export const PERSONAL_PROJECTS: Project[] = [
     period: { start: "2025" },
     link: "https://forgedocks.vercel.app/",
     skills: ["Next.js 15", "React 19", "TypeScript", "Tailwind CSS", "Shadcn UI", "PostgreSQL", "Supabase", "Clerk", "Framer Motion", "Cloudflare R2"],
-    isExpanded: true,
+    categories: ["erps", "designs"],
+    isExpanded: false,
+    showOnHomepage: true,
     description: `A modern, SEO-optimized web productivity platform that unifies 100+ online utilities (PDF, images, dev tools, calculators, AI, and business helpers) into a single ecosystem.
 - **Specialized Product Suites**: Built modular toolkits like PDFForge (merging/compressing), DevForge (formatting/decoding/testing), ImageForge (upscaling/background-removing), and AIForge.
 - **Robust Architecture**: Built with Next.js 15 App Router, React 19, and Server Actions, using Clerk and NextAuth for secure multi-tenant sessions.
@@ -47,9 +99,11 @@ export const PERSONAL_PROJECTS: Project[] = [
     id: "vinu-invoicing",
     title: "Vinu Invoicing — Financial Operations Platform",
     period: { start: "2026" },
-    link: "https://github.com/Surajshegukar/vinu-invoicing",
+    link: "https://vinu-invoicing.vercel.app/",
     skills: ["Next.js", "React 19", "TypeScript", "MongoDB", "Mongoose", "Tailwind CSS", "React Query", "jsPDF", "Zod", "RBAC"],
-    isExpanded: true,
+    categories: ["erps"],
+    isExpanded: false,
+    showOnHomepage: true,
     description: `A multi-tenant role-based access control (RBAC) invoicing and inventory management platform built with Next.js and MongoDB.
 - **Granular RBAC & Session Security**: Features a custom authorization table, secure JWT-based sessions, and client/server-side middleware to restrict user actions by role.
 - **Dynamic Invoices & UPI Payments**: Auto-calculates multi-currency totals, taxes, and discounts, converting totals to words and embedding dynamic UPI payment QR codes.
@@ -62,7 +116,9 @@ export const PERSONAL_PROJECTS: Project[] = [
     period: { start: "2026" },
     link: "https://inteljet.vercel.app/",
     skills: ["Next.js", "React", "TypeScript", "Node.js", "Express", "MongoDB", "Redis", "BullMQ", "Chrome Extension", "IndexedDB", "Dexie.js", "Gemini AI", "Turborepo"],
-    isExpanded: true,
+    categories: ["ai"],
+    isExpanded: false,
+    showOnHomepage: false,
     description: `A privacy-first, AI-augmented job tracking and application management platform managed in a unified Turborepo monorepo workspace.
 - **Offline-First Chrome Extension (Manifest V3)**: Features domain-specific scrapers (LinkedIn, Indeed, Naukri, Wellfound) and a generic schema parser, with real-time popup auto-refresh using \`MutationObserver\` and IndexedDB (via Dexie.js) for local storage.
 - **Resume Intelligence & Tailoring**: Extends resume parsing (PDF/DOCX) using \`pdf-parse\` and \`mammoth\`, featuring automated tailoring, comparison diff engine, and outcome tracking.
@@ -75,7 +131,9 @@ export const PERSONAL_PROJECTS: Project[] = [
     period: { start: "2026" },
     link: "https://github.com/Surajshegukar/research-agent",
     skills: ["LangChain", "Google Gemini", "Tavily Search API", "BeautifulSoup", "Python", "uv"],
-    isExpanded: true,
+    categories: ["ai"],
+    isExpanded: false,
+    showOnHomepage: false,
     description: `An autonomous, sequential multi-agent research pipeline that automates the process of gathering, analyzing, and synthesizing information.
 - **Sequential Multi-Agent Architecture**: Built with LangChain and Google Gemini, utilizing specialized agents (Search, Reading, Writer, Critic) for the research lifecycle.
 - **Web Search & Scraping**: Integrates Tavily Search API and BeautifulSoup web scraping to retrieve and extract real-time data from top relevant articles.
@@ -88,7 +146,9 @@ export const PERSONAL_PROJECTS: Project[] = [
     period: { start: "2026" },
     link: "https://github.com/Surajshegukar/ytrag-simple-rag-engine",
     skills: ["FastAPI", "FAISS", "Google Gemini", "Sentence-Transformers", "LangChain", "Python", "Vanilla JS"],
-    isExpanded: true,
+    categories: ["ai"],
+    isExpanded: false,
+    showOnHomepage: false,
     description: `A lightweight, local Retrieval-Augmented Generation (RAG) platform featuring a FastAPI backend and a premium Single-Page Application (SPA) web interface.
 - **Multi-Format Ingestion**: Supports parsing and ingestion of PDF, Word, Excel, CSV, JSON, and plain text files with dynamic chunking using LangChain.
 - **Local Embedding & Vector Search**: Generates dense vector representations using Sentence-Transformers and handles fast similarity search utilizing FAISS.
@@ -102,6 +162,8 @@ export const PERSONAL_PROJECTS: Project[] = [
     period: { start: "2024" },
     link: "https://github.com/Surajshegukar/risk-controlled-algorithmic-trading-using-machine-learning",
     skills: ["Python", "Machine Learning", "Jupyter Notebook", "Pandas", "Scikit-Learn"],
+    categories: ["ai"],
+    showOnHomepage: false,
     description: `An algorithmic trading model using Machine Learning to analyze stock trends, assess trading risks, and execute risk-controlled options/equity strategies.
 - Backtested machine learning models (Random Forest, SVM) on historical stock data to predict price direction.
 - Designed key risk assessment metrics to mitigate drawdown and control options position sizing dynamically.`,
@@ -113,9 +175,9 @@ export const PERSONAL_PROJECTS: Project[] = [
     period: { start: "2024" },
     link: "https://github.com/Surajshegukar/algorithmic-trading-strategies",
     skills: ["Python", "Jupyter Notebook", "NumPy", "Backtesting", "Quantitative Finance"],
+    categories: ["ai"],
+    showOnHomepage: false,
     description: `A compilation of quantitative finance models, backtesting environments, momentum trading, and statistical arbitrage strategies tested in Jupyter Notebooks.`,
     logo: "https://api.dicebear.com/7.x/shapes/svg?seed=AlgoTrade",
   },
-
-
 ];

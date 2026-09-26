@@ -73,6 +73,13 @@ const MENU_LINKS: CommandLinkItem[] = [
 
 const PRODUCT_LINKS: CommandLinkItem[] = [
   {
+    title: "School ERP (Infynospark)",
+    href: "https://school.infynospark.cloud/",
+    icon: Icons.react,
+    keywords: ["school", "erp", "saas", "infynospark", "education"],
+    openInNewTab: true,
+  },
+  {
     title: "ForgeDock",
     href: "https://forgedock.com",
     icon: Icons.react,

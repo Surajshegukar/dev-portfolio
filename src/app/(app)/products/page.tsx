@@ -13,6 +13,15 @@ export const metadata: Metadata = {
 
 const products = [
   {
+    id: "infynospark-school-erp",
+    name: "Subscription SaaS School ERP",
+    description:
+      "A multi-tenant, subscription-based SaaS School Management ERP developed for Infynospark client, empowering educational institutions with student admissions, attendance, fee collection, timetable management, and automated report card generation.",
+    href: "https://school.infynospark.cloud/",
+    status: "Live",
+    tech: ["SaaS", "Multi-Tenant", "React.js", "Next.js", "Node.js", "Express.js", "MongoDB", "Tailwind CSS", "RBAC"],
+  },
+  {
     id: "forgedock",
     name: "ForgeDock",
     description:

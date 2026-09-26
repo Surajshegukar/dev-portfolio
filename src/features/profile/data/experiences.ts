@@ -2,6 +2,46 @@ import type { Experience } from "../types/experiences";
 
 export const EXPERIENCES: Experience[] = [
   {
+    id: "freelance",
+    companyName: "Self-Employed",
+    companyLogo: "https://api.dicebear.com/7.x/initials/svg?seed=SE&backgroundColor=10b981",
+    isCurrentEmployer: true,
+    positions: [
+      {
+        id: "freelance-fullstack-dev",
+        title: "Freelance Full-Stack Developer",
+        employmentPeriod: {
+          start: "06.2026",
+        },
+        employmentType: "Self-employed",
+        icon: "code",
+        description: `
+- Designed, developed, and deployed custom **web applications, business platforms, and ERP solutions** tailored to client specifications.
+- Architected responsive frontend interfaces using **React.js, Next.js, and Tailwind CSS** focusing on high performance, accessibility, and modern UI/UX design.
+- Built scalable backend services, RESTful APIs, and database structures using **Node.js, Express.js, Prisma ORM**, and **MongoDB / SQL**.
+- Implemented business-critical ERP features including vendor/client management, inventory tracking, role-based access control (RBAC), and automated workflows.
+- Managed end-to-end client projects from requirements gathering and prototyping to server deployment, performance optimization, and ongoing maintenance.
+        `,
+        skills: [
+          "React.js",
+          "Next.js",
+          "Node.js",
+          "Express.js",
+          "TypeScript",
+          "Tailwind CSS",
+          "Prisma ORM",
+          "MongoDB",
+          "SQL",
+          "ERP Systems",
+          "REST APIs",
+          "Web Design"
+        ],
+        isExpanded: false,
+      },
+    ],
+    theme: false,
+  },
+  {
     id: "quickensol",
     companyName: "Quickensol IT Solutions LLP",
     companyLogo: "https://api.dicebear.com/7.x/initials/svg?seed=Q&backgroundColor=ffc107",
@@ -39,7 +79,7 @@ export const EXPERIENCES: Experience[] = [
           "REST APIs",
           "SEO"
         ],
-        isExpanded: true,
+        isExpanded: false,
       }
     ],
     theme: false,
@@ -71,7 +111,7 @@ export const EXPERIENCES: Experience[] = [
           "Express.js",
           "MongoDB"
         ],
-        isExpanded: true,
+        isExpanded: false,
       }
     ],
     theme: false,

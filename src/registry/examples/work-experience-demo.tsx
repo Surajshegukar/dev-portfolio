@@ -31,7 +31,7 @@ const WORK_EXPERIENCE: ExperienceItemType[] = [
           "Research",
           "Project Management",
         ],
-        isExpanded: true,
+        isExpanded: false,
       },
       {
         id: "7586afb2-40e8-49c4-8983-2254c9446540",
