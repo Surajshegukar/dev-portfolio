@@ -69,7 +69,7 @@ const CATEGORY_TABS: CategoryTab[] = [
   },
   {
     id: "ai",
-    label: "AI Products",
+    label: "AI/ML Projects",
     icon: BotIcon,
     description: "LLM agents, RAG engines, Chrome extensions, & ML models",
   },
